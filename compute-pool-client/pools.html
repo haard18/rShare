@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Compute Pools</title>
+</head>
+<body>
+    <h1>Active Compute Pools</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Pool Name</th>
+                <th>Host</th>
+                <th>Port</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="poolsTable"></tbody>
+    </table>
+
+    <button onclick="window.location.href='index.html'">Back</button>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        async function fetchPools() {
+            const pools = await ipcRenderer.invoke("discover-pools");
+            const table = document.getElementById("poolsTable");
+
+            pools.forEach(pool => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${pool.name}</td>
+                    <td>${pool.host}</td>
+                    <td>${pool.port}</td>
+                    <td><button onclick="joinPool('${pool.host}', ${pool.port})">Join</button></td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        async function joinPool(host, port) {
+            const allocatedResources = JSON.parse(sessionStorage.getItem("allocatedResources"));
+
+            try {
+                const response = await ipcRenderer.invoke("join-pool", { host, port, resources: allocatedResources });
+                alert(response);
+            } catch (error) {
+                alert("Error: " + error);
+            }
+        }
+
+        fetchPools();
+    </script>
+</body>
+</html>

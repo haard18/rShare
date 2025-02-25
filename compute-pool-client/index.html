@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Compute Pool Client</title>
+</head>
+<body>
+    <h1>Compute Pool Client</h1>
+    <pre id="stats">Fetching system info...</pre>
+
+    <h2>Allocate Resources</h2>
+    <label>CPU Cores: <span id="cpuValue">1</span></label>
+    <input type="range" id="cpuSlider" min="1" max="8" value="1">
+
+    <label>RAM (GB): <span id="ramValue">1</span></label>
+    <input type="range" id="ramSlider" min="1" max="16" value="1">
+
+    <label>GPU (GB): <span id="gpuValue">1</span></label>
+    <input type="range" id="gpuSlider" min="0" max="4" value="1">
+
+    <button id="joinPool">Find Compute Pools</button>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        async function fetchSystemInfo() {
+            const stats = await ipcRenderer.invoke("get-system-info");
+            document.getElementById("stats").textContent = JSON.stringify(stats, null, 2);
+
+            document.getElementById("cpuSlider").max = stats.cpuCores;
+            document.getElementById("ramSlider").max = Math.floor(stats.freeRAM);
+        }
+
+        document.getElementById("cpuSlider").oninput = (e) => {
+            document.getElementById("cpuValue").textContent = e.target.value;
+        };
+        document.getElementById("ramSlider").oninput = (e) => {
+            document.getElementById("ramValue").textContent = e.target.value;
+        };
+        document.getElementById("gpuSlider").oninput = (e) => {
+            document.getElementById("gpuValue").textContent = e.target.value;
+        };
+
+        document.getElementById("joinPool").addEventListener("click", () => {
+            const allocatedResources = {
+                cpu: parseInt(document.getElementById("cpuSlider").value),
+                ram: parseInt(document.getElementById("ramSlider").value),
+                gpu: parseInt(document.getElementById("gpuSlider").value),
+            };
+
+            sessionStorage.setItem("allocatedResources", JSON.stringify(allocatedResources));
+            window.location.href = "pools.html";
+        });
+
+        fetchSystemInfo();
+    </script>
+</body>
+</html>
