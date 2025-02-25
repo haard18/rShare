@@ -1,57 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Compute Pool Client</title>
-</head>
-<body>
-    <h1>Compute Pool Client</h1>
-    <pre id="stats">Fetching system info...</pre>
-
-    <h2>Allocate Resources</h2>
-    <label>CPU Cores: <span id="cpuValue">1</span></label>
-    <input type="range" id="cpuSlider" min="1" max="8" value="1">
-
-    <label>RAM (GB): <span id="ramValue">1</span></label>
-    <input type="range" id="ramSlider" min="1" max="16" value="1">
-
-    <label>GPU (GB): <span id="gpuValue">1</span></label>
-    <input type="range" id="gpuSlider" min="0" max="4" value="1">
-
-    <button id="joinPool">Find Compute Pools</button>
-
-    <script>
-        const { ipcRenderer } = require("electron");
-
-        async function fetchSystemInfo() {
-            const stats = await ipcRenderer.invoke("get-system-info");
-            document.getElementById("stats").textContent = JSON.stringify(stats, null, 2);
-
-            document.getElementById("cpuSlider").max = stats.cpuCores;
-            document.getElementById("ramSlider").max = Math.floor(stats.freeRAM);
-        }
-
-        document.getElementById("cpuSlider").oninput = (e) => {
-            document.getElementById("cpuValue").textContent = e.target.value;
-        };
-        document.getElementById("ramSlider").oninput = (e) => {
-            document.getElementById("ramValue").textContent = e.target.value;
-        };
-        document.getElementById("gpuSlider").oninput = (e) => {
-            document.getElementById("gpuValue").textContent = e.target.value;
-        };
-
-        document.getElementById("joinPool").addEventListener("click", () => {
-            const allocatedResources = {
-                cpu: parseInt(document.getElementById("cpuSlider").value),
-                ram: parseInt(document.getElementById("ramSlider").value),
-                gpu: parseInt(document.getElementById("gpuSlider").value),
-            };
-
-            sessionStorage.setItem("allocatedResources", JSON.stringify(allocatedResources));
-            window.location.href = "pools.html";
-        });
-
-        fetchSystemInfo();
-    </script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Compute Pool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body
+    class="flex flex-col items-center justify-center h-screen bg-gray-100 text-gray-900"
+  >
+    <h1
+      class="text-4xl font-bold mb-8 bg-yellow-300 px-6 py-3 rounded-lg shadow-[6px_6px_0px_#000] border-4 border-black"
+    >
+      Decentralized Compute Pool
+    </h1>
+    <div class="flex gap-6">
+      <a
+        href="create_pools.html"
+        class="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-bold text-lg border-4 border-black rounded-lg shadow-[6px_6px_0px_#000] transition-all"
+      >
+        Create a Pool
+      </a>
+      <a
+        href="pools.html"
+        class="px-8 py-4 bg-green-500 hover:bg-green-600 text-white font-bold text-lg border-4 border-black rounded-lg shadow-[6px_6px_0px_#000] transition-all"
+      >
+        Join a Pool
+      </a>
+    </div>
+  </body>
 </html>

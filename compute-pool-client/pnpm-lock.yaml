@@ -14,6 +14,9 @@ importers:
       electron:
         specifier: ^34.2.0
         version: 34.2.0
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       ws:
         specifier: ^8.18.1
         version: 8.18.1
@@ -387,6 +390,10 @@ packages:
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
     engines: {node: '>= 4.0.0'}
+
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
@@ -838,6 +845,8 @@ snapshots:
   undici-types@6.19.8: {}
 
   universalify@0.1.2: {}
+
+  uuid@11.1.0: {}
 
   wrappy@1.0.2: {}
 

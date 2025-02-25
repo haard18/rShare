@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Create Compute Pool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        async function createPool() {
+            const poolName = document.getElementById("poolName").value;
+            const port = document.getElementById("poolPort").value;
+            const maxParticipants = document.getElementById("maxParticipants").value;
+            const taskTemplate = document.getElementById("taskTemplate").value;
+            const cpuLimit = document.getElementById("cpuLimit").value;
+            const ramLimit = document.getElementById("ramLimit").value;
+            const gpuLimit = document.getElementById("gpuLimit").value;
+            const approach = document.getElementById("approach").value;
+
+            if (!poolName || !port || !maxParticipants || !taskTemplate || !cpuLimit || !ramLimit || !approach) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            const poolData = {
+                name: poolName,
+                port: parseInt(port),
+                maxParticipants: parseInt(maxParticipants),
+                taskTemplate: taskTemplate,
+                cpuLimit: parseInt(cpuLimit),
+                ramLimit: parseInt(ramLimit),
+                gpuLimit: parseInt(gpuLimit),
+                approach: approach
+            };
+
+            try {
+                const response = await ipcRenderer.invoke("create-pool", poolData);
+                alert(response);
+                fetchConnectedAgents(); // Start fetching connected agents
+            } catch (error) {
+                alert("Error creating pool: " + error);
+            }
+        }
+
+        async function fetchConnectedAgents() {
+            const agents = await ipcRenderer.invoke("get-connected-agents");
+            const table = document.getElementById("agentsTable");
+            table.innerHTML = "";
+
+            agents.forEach(agent => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${agent.id}</td>
+                    <td>${agent.cpu} cores</td>
+                    <td>${agent.ram} GB</td>
+                    <td>${agent.gpu || "N/A"}</td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        setInterval(fetchConnectedAgents, 5000); // Auto-refresh agent list every 5 sec
+    </script>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-900 p-8">
+    <h1 class="text-4xl font-bold mb-6 bg-yellow-300 px-6 py-3 rounded-lg shadow-[6px_6px_0px_#000] border-4 border-black">
+        Create a Compute Pool
+    </h1>
+
+    <label class="text-lg font-bold">Pool Name:</label>
+    <input type="text" id="poolName" placeholder="Enter pool name" class="border-2 border-black rounded-lg p-2">
+    <br>
+
+    <label class="text-lg font-bold">Port:</label>
+    <input type="number" id="poolPort" placeholder="Enter port number" class="border-2 border-black rounded-lg p-2">
+    <br>
+
+    <label class="text-lg font-bold">Max Participants:</label>
+    <input type="number" id="maxParticipants" min="1" value="5" class="border-2 border-black rounded-lg p-2">
+    <br>
+
+    <label class="text-lg font-bold">Task Template:</label>
+    <select id="taskTemplate" class="border-2 border-black rounded-lg p-2">
+        <option value="ai-training">AI Training</option>
+        <option value="web-scraping">Web Scraping</option>
+        <option value="data-processing">Data Processing</option>
+        <option value="custom">Custom Task</option>
+    </select>
+    <br>
+
+    <label class="text-lg font-bold">Approach:</label>
+    <select id="approach" class="border-2 border-black rounded-lg p-2">
+        <option value="parallel">Parallel</option>
+        <option value="distributed">Distributed</option>
+    </select>
+    <br>
+
+    <h2 class="text-2xl font-bold mt-6">Resource Limits per Participant</h2>
+    <label class="text-lg font-bold">CPU Cores: <span id="cpuValue">1</span></label>
+    <input type="range" id="cpuLimit" min="1" max="16" value="1" class="w-full cursor-pointer"
+           oninput="document.getElementById('cpuValue').innerText = this.value">
+    <br>
+
+    <label class="text-lg font-bold">RAM (GB): <span id="ramValue">1</span></label>
+    <input type="range" id="ramLimit" min="1" max="32" value="1" class="w-full cursor-pointer"
+           oninput="document.getElementById('ramValue').innerText = this.value">
+    <br>
+
+    <label class="text-lg font-bold">GPU Requirement:</label>
+    <select id="gpuLimit" class="border-2 border-black rounded-lg p-2">
+        <option value="0">No GPU</option>
+        <option value="1">1 GPU</option>
+        <option value="2">2 GPUs</option>
+    </select>
+    <br>
+
+    <button onclick="createPool()" class="mt-4 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold border-4 border-black rounded-lg shadow-[6px_6px_0px_#000] transition-all">
+        Start Pool
+    </button>
+    <button onclick="window.location.href='pools.html'" class="mt-4 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-bold border-4 border-black rounded-lg shadow-[6px_6px_0px_#000] transition-all">
+        Cancel
+    </button>
+
+    <h2 class="text-2xl font-bold mt-6">Connected Agents</h2>
+    <table border="1" class="border-collapse border-4 border-black shadow-[6px_6px_0px_#000] bg-white">
+        <thead class="bg-gray-200 border-b-4 border-black">
+            <tr>
+                <th class="px-4 py-2 border border-black">Agent ID</th>
+                <th class="px-4 py-2 border border-black">CPU</th>
+                <th class="px-4 py-2 border border-black">RAM</th>
+                <th class="px-4 py-2 border border-black">GPU</th>
+            </tr>
+        </thead>
+        <tbody id="agentsTable"></tbody>
+    </table>
+</body>
+</html>

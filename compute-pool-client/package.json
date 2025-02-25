@@ -13,6 +13,7 @@
   "dependencies": {
     "bonjour": "^3.5.0",
     "electron": "^34.2.0",
+    "uuid": "^11.1.0",
     "ws": "^8.18.1"
   }
 }
