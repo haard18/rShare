@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compute Pool Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white m-5">
+
+    <h1 class="text-3xl text-cyan-400">Compute Pool Dashboard</h1>
+
+    <!-- Pool State -->
+    <div class="bg-gray-800 border border-cyan-400 rounded-lg p-4 mb-5">
+        <h2 class="text-2xl text-cyan-400">Pool State</h2>
+        <p><strong>Status:</strong> <span id="pool-status">Loading...</span></p>
+        <p><strong>CPU Limit:</strong> <span id="cpu-limit">-</span></p>
+        <p><strong>RAM Limit:</strong> <span id="ram-limit">-</span></p>
+        <p><strong>GPU Limit:</strong> <span id="gpu-limit">-</span></p>
+    </div>
+
+    <!-- Total Resources -->
+    <div class="bg-gray-800 border border-cyan-400 rounded-lg p-4 mb-5">
+        <h2 class="text-2xl text-cyan-400">Total Allocated Resources</h2>
+        <p><strong>CPU:</strong> <span id="total-cpu">0</span> Cores</p>
+        <p><strong>RAM:</strong> <span id="total-ram">0</span> GB</p>
+        <p><strong>GPU:</strong> <span id="total-gpu">0</span> Units</p>
+    </div>
+
+    <!-- Connected Agents -->
+    <div class="bg-gray-800 border border-cyan-400 rounded-lg p-4 mb-5">
+        <h2 class="text-2xl text-cyan-400">Connected Agents</h2>
+        <table class="w-full border-collapse mt-2">
+            <thead>
+                <tr>
+                    <th class="bg-cyan-400 text-black p-2">Agent ID</th>
+                    <th class="bg-cyan-400 text-black p-2">CPU</th>
+                    <th class="bg-cyan-400 text-black p-2">RAM</th>
+                    <th class="bg-cyan-400 text-black p-2">GPU</th>
+                    <th class="bg-cyan-400 text-black p-2">Status</th>
+                </tr>
+            </thead>
+            <tbody id="agents-table">
+                <tr><td colspan="5" class="text-center">No agents connected</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Task Queue -->
+    <div class="bg-gray-800 border border-cyan-400 rounded-lg p-4 mb-5">
+        <h2 class="text-2xl text-cyan-400">Task Queue</h2>
+        <table class="w-full border-collapse mt-2">
+            <thead>
+                <tr>
+                    <th class="bg-cyan-400 text-black p-2">Task ID</th>
+                    <th class="bg-cyan-400 text-black p-2">Command</th>
+                    <th class="bg-cyan-400 text-black p-2">CPU</th>
+                    <th class="bg-cyan-400 text-black p-2">RAM</th>
+                    <th class="bg-cyan-400 text-black p-2">GPU</th>
+                </tr>
+            </thead>
+            <tbody id="tasks-table">
+                <tr><td colspan="5" class="text-center">No pending tasks</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <button class="bg-cyan-400 text-black p-2 rounded hover:bg-cyan-500 mt-2" onclick="refreshDashboard()">🔄 Refresh Dashboard</button>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+
+        async function refreshDashboard() {
+            try {
+                // Get Pool State
+                const poolState = await ipcRenderer.invoke("get-pool-state");
+                document.getElementById("pool-status").innerText = poolState.status;
+                
+                if (poolState.poolConfig) {
+                    document.getElementById("cpu-limit").innerText = poolState.poolConfig.cpuLimit;
+                    document.getElementById("ram-limit").innerText = poolState.poolConfig.ramLimit;
+                    document.getElementById("gpu-limit").innerText = poolState.poolConfig.gpuLimit;
+                }
+
+                // Get Total Resources
+                const totalResources = await ipcRenderer.invoke("get-total-resources");
+                document.getElementById("total-cpu").innerText = totalResources.cpu;
+                document.getElementById("total-ram").innerText = totalResources.ram;
+                document.getElementById("total-gpu").innerText = totalResources.gpu;
+
+                // Get Connected Agents
+                const agents = poolState.agents;
+                const agentsTable = document.getElementById("agents-table");
+                agentsTable.innerHTML = agents.length 
+                    ? agents.map(agent => `
+                        <tr>
+                            <td class="p-2">${agent.id}</td>
+                            <td class="p-2">${agent.cpu} Cores</td>
+                            <td class="p-2">${agent.ram} GB</td>
+                            <td class="p-2">${agent.gpu}</td>
+                            <td class="p-2">${agent.status}</td>
+                        </tr>
+                    `).join("")
+                    : '<tr><td colspan="5" class="text-center">No agents connected</td></tr>';
+
+                // Get Task Queue
+                const tasks = await ipcRenderer.invoke("get-task-queue");
+                const tasksTable = document.getElementById("tasks-table");
+                tasksTable.innerHTML = tasks.length 
+                    ? tasks.map(task => `
+                        <tr>
+                            <td class="p-2">${task.taskId}</td>
+                            <td class="p-2">${task.command}</td>
+                            <td class="p-2">${task.requirements.cpu} Cores</td>
+                            <td class="p-2">${task.requirements.ram} GB</td>
+                            <td class="p-2">${task.requirements.gpu} Units</td>
+                        </tr>
+                    `).join("")
+                    : '<tr><td colspan="5" class="text-center">No pending tasks</td></tr>';
+            } catch (error) {
+                console.error("❌ Error refreshing dashboard:", error);
+            }
+        }
+
+        // Auto-refresh every 5 seconds
+        setInterval(refreshDashboard, 5000);
+
+        // Initial load
+        refreshDashboard();
+    </script>
+
+</body>
+</html>
