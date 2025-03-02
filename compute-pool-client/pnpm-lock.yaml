@@ -11,18 +11,22 @@ importers:
       bonjour:
         specifier: ^3.5.0
         version: 3.5.0
-      electron:
-        specifier: ^34.2.0
-        version: 34.2.0
-      electron-builder:
-        specifier: ^25.1.8
-        version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
+      systeminformation:
+        specifier: ^5.25.11
+        version: 5.25.11
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
       ws:
         specifier: ^8.18.1
         version: 8.18.1
+    devDependencies:
+      electron:
+        specifier: ^34.2.0
+        version: 34.2.0
+      electron-builder:
+        specifier: ^25.1.8
+        version: 25.1.8(electron-builder-squirrel-windows@25.1.8)
 
 packages:
 
@@ -1294,6 +1298,12 @@ packages:
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
     engines: {node: '>=8'}
+
+  systeminformation@5.25.11:
+    resolution: {integrity: sha512-jI01fn/t47rrLTQB0FTlMCC+5dYx8o0RRF+R4BPiUNsvg5OdY0s9DKMFmJGrx5SwMZQ4cag0Gl6v8oycso9b/g==}
+    engines: {node: '>=8.0.0'}
+    os: [darwin, linux, win32, freebsd, openbsd, netbsd, sunos, android]
+    hasBin: true
 
   tar-stream@2.2.0:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
@@ -2963,6 +2973,8 @@ snapshots:
   supports-color@7.2.0:
     dependencies:
       has-flag: 4.0.0
+
+  systeminformation@5.25.11: {}
 
   tar-stream@2.2.0:
     dependencies:
